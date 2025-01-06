@@ -13,7 +13,12 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/app"
+                "PYTHONPATH": "${workspaceFolder}/app",
+                "MYSQL_ROOT_PASSWORD" :"rootpassword",
+                "MYSQL_DATABASE":"stream_data",
+                "MYSQL_USER":"streamuser",
+                "MYSQL_PASSWORD":"streampass",
+                "MYSQL_HOST":"localhost"
             }
         },
         {
@@ -28,7 +33,12 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/app"
+                "PYTHONPATH": "${workspaceFolder}/app",
+                "MYSQL_ROOT_PASSWORD" :"rootpassword",
+                "MYSQL_DATABASE":"stream_data",
+                "MYSQL_USER":"streamuser",
+                "MYSQL_PASSWORD":"streampass",
+                "MYSQL_HOST":"localhost"
             }
         }
     ],

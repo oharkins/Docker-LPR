@@ -1,12 +1,45 @@
 version: '3.8'
 
 services:
-  lpr-parser:
-    build: .
-    container_name: stream-parser-host-port
+  db:
+    image: mysql:8.0
+    container_name: lpr-data-mysql
+    restart: always
     environment:
-      - PYTHONUNBUFFERED=1
-    # Default command can be overridden via command line
-    command: --host 166.142.83.208 --port 5002
-    # Restart policy for production use
-    restart: unless-stopped
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"                        # Host:Container port mapping
+    volumes:
+      - mysql_data:/var/lib/mysql          # Persist data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Initial SQL script (optional)
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  # lpr-parser-1:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     MYSQL_HOST: mysql
+  #     MYSQL_DATABASE: ${MYSQL_DATABASE}
+  #     MYSQL_USER: ${MYSQL_USER}
+  #     MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+  #     STREAM_HOST: 166.142.83.208
+  #     STREAM_PORT: 5002
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+
+volumes:
+  mysql_data:                              # Named volume for data persistence
+  
