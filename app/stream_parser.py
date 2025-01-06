@@ -4,6 +4,8 @@ import queue
 import time
 import json
 import argparse
+import os
+import mysql.connector
 
 class StreamParser:
     def __init__(self, host, port):
@@ -13,6 +15,44 @@ class StreamParser:
         self.data_queue = queue.Queue()
         self.running = False
         self.PACKET_HEADER = b'\xbb\x0b\x00\x00'
+
+        # Database configuration
+        self.db_config = {
+            'host': os.getenv('MYSQL_HOST', 'mysql'),
+            'user': os.getenv('MYSQL_USER', 'user'),
+            'password': os.getenv('MYSQL_PASSWORD', 'password'),
+            'database': os.getenv('MYSQL_DATABASE', 'stream_data')
+        }
+
+        # Initialize database connection
+        self.init_database()
+        
+    def init_database(self):
+        try:
+            conn = mysql.connector.connect(**self.db_config)
+            cursor = conn.cursor()
+            
+            # Create tables if they don't exist
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS lpr_data (
+                    vehicle_id VARCHAR(8) PRIMARY KEY,
+                    make VARCHAR(50),
+                    model VARCHAR(50),
+                    color VARCHAR(50),
+                    timestamp DATETIME,
+                    INDEX (vehicle_id),
+                    INDEX (timestamp)
+                )
+            ''')
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            print("Database initialized successfully")
+            
+        except Exception as e:
+            print(f"Database initialization error: {e}")
+            raise
         
     def connect(self):
         try:
@@ -30,6 +70,29 @@ class StreamParser:
         except Exception as e:
             print(f"Connection error: {e}")
             self.running = False
+    
+    def upsert_vehicle_data(self, vehicle_id, make, model, color):
+        try:
+            conn = mysql.connector.connect(**self.config)
+            cursor = conn.cursor()
+            
+            # Insert or update vehicle data
+            query = '''
+                INSERT INTO vehicle_data (vehicle_id, make, model, color)
+                VALUES (%s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE 
+                    make = VALUES(make),
+                    model = VALUES(model),
+                    color = VALUES(color),
+                    last_seen = CURRENT_TIMESTAMP
+            '''
+            cursor.execute(query, (vehicle_id, make, model, color))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            print(f"Successfully updated database for vehicle {vehicle_id}")
+        except Exception as e:
+            print(f"Database update error: {e}")
 
     def receive_data(self):
         while self.running:
@@ -102,6 +165,8 @@ class StreamParser:
             except Exception as e:
                 pass
 
+            self.db_manager.upsert_vehicle_data(vehicle_id, json_str.get('make'), json_str.get('model'), json_str.get('color'))
+            print(f"Processed vehicle {vehicle_id} with data {json_str.get('make'), json_str.get('model'), json_str.get('color')}")
         except Exception as e:
             print(f"Packet parsing error: {e}")
 
@@ -114,12 +179,13 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Stream Parser')
     parser.add_argument('--host', 
                       type=str, 
-                      default='166.142.83.208',
-                      help='Host address (default: 166.142.83.208)')
+                      required=True, 
+                      help='Host address')
     parser.add_argument('--port', 
-                      type=int, 
-                      default=5002,
-                      help='Port number (default: 5002)')
+                      type=int,
+                      required=True, 
+                      
+                      help='Port number')
     return parser.parse_args()
 
 def main():
