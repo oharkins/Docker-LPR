@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  lpr-parser:
+    build: .
+    container_name: stream-parser-host-port
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Default command can be overridden via command line
+    command: --host 166.142.83.208 --port 5002
+    # Restart policy for production use
+    restart: unless-stopped

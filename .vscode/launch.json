@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Stream Parser",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/app/stream_parser.py",
+            "args": [
+                "--host", "166.142.83.208",
+                "--port", "5002"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/app"
+            }
+        },
+        {
+            "name": "Python Debugger: Stream Parser (Custom)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/app/stream_parser.py",
+            "args": [
+                "--host", "${input:hostAddress}",
+                "--port", "${input:portNumber}"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/app"
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "hostAddress",
+            "type": "promptString",
+            "description": "Enter the host address",
+            "default": "166.142.83.208"
+        },
+        {
+            "id": "portNumber",
+            "type": "promptString",
+            "description": "Enter the port number",
+            "default": "5002"
+        }
+    ]
+}
