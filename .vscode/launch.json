@@ -7,8 +7,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/app/stream_parser.py",
             "args": [
-                "--host", "166.142.83.208",
-                "--port", "5002"
+                "--host", "107.91.112.225",
+                "--port", "5001"
             ],
             "console": "integratedTerminal",
             "justMyCode": true,

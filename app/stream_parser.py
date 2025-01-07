@@ -73,18 +73,18 @@ class StreamParser:
     
     def upsert_vehicle_data(self, vehicle_id, make, model, color):
         try:
-            conn = mysql.connector.connect(**self.config)
+            conn = mysql.connector.connect(**self.db_config)  # Changed from self.config to self.db_config
             cursor = conn.cursor()
             
             # Insert or update vehicle data
             query = '''
-                INSERT INTO vehicle_data (vehicle_id, make, model, color)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO lpr_data (vehicle_id, make, model, color, timestamp)
+                VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
                 ON DUPLICATE KEY UPDATE 
                     make = VALUES(make),
                     model = VALUES(model),
                     color = VALUES(color),
-                    last_seen = CURRENT_TIMESTAMP
+                    timestamp = CURRENT_TIMESTAMP
             '''
             cursor.execute(query, (vehicle_id, make, model, color))
             conn.commit()
@@ -155,18 +155,20 @@ class StreamParser:
 
             try:
                 # Only look at last 200 bytes
-                packet_end = packet[-200:] if len(packet) > 200 else packet
-                packet_str = packet_end.decode('utf-8', errors='ignore')
+                packet_blob = packet[-200:] if len(packet) > 200 else packet
+                packet_str = packet_blob.decode('utf-8', errors='ignore')
                 json_start = packet_str.rfind('{')
-                if json_start != -1:
-                    json_str = packet_str[json_start:]
-                    if json_str.count('{') == 1 and '}' in json_str:  # Ensure it's a complete, single JSON object
+                json_stop = packet_str.rfind('}')
+                if json_start != -1 and json_stop != -1 and json_stop > json_start:
+                    json_str = packet_str[json_start:json_stop+1]
+                    if json_str.count('{') == 1 and json_str.count('}') == 1:  # Ensure it's a complete, single JSON object
                         print(f"JSON string: {json_str}")
             except Exception as e:
                 pass
-
-            self.db_manager.upsert_vehicle_data(vehicle_id, json_str.get('make'), json_str.get('model'), json_str.get('color'))
-            print(f"Processed vehicle {vehicle_id} with data {json_str.get('make'), json_str.get('model'), json_str.get('color')}")
+            data = json.loads(json_str)
+            print(f"Have vehicle {vehicle_id} with data {data.get('make'), data.get('model'), data.get('color')}")
+            self.upsert_vehicle_data(vehicle_id, data.get('make'), data.get('model'), data.get('color'))
+            print(f"Saved vehicle {vehicle_id}")
         except Exception as e:
             print(f"Packet parsing error: {e}")
 
