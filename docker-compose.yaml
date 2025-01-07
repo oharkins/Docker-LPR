@@ -25,20 +25,20 @@ services:
       timeout: 5s
       retries: 5
   
-  # lpr-parser-1:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     MYSQL_HOST: mysql
-  #     MYSQL_DATABASE: ${MYSQL_DATABASE}
-  #     MYSQL_USER: ${MYSQL_USER}
-  #     MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-  #     STREAM_HOST: 166.142.83.208
-  #     STREAM_PORT: 5002
-  #   depends_on:
-  #     mysql:
-  #       condition: service_healthy
+  lpr-parser-1:
+    build:
+      context: .
+      dockerfile: dockerfile
+    environment:
+      MYSQL_HOST: lpr-data-mysql
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      STREAM_HOST: 107.91.112.225
+      STREAM_PORT: 5001
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   mysql_data:                              # Named volume for data persistence

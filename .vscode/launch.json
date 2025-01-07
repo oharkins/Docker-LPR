@@ -5,11 +5,7 @@
             "name": "Python Debugger: Stream Parser",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/app/stream_parser.py",
-            "args": [
-                "--host", "107.91.112.225",
-                "--port", "5001"
-            ],
+            "program": "${workspaceFolder}/stream_parser.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
@@ -18,18 +14,17 @@
                 "MYSQL_DATABASE":"stream_data",
                 "MYSQL_USER":"streamuser",
                 "MYSQL_PASSWORD":"streampass",
-                "MYSQL_HOST":"localhost"
+                "MYSQL_HOST":"localhost",
+                "STREAM_HOST":"107.91.112.225",
+                "STREAM_PORT":"5001"
+
             }
         },
         {
             "name": "Python Debugger: Stream Parser (Custom)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/app/stream_parser.py",
-            "args": [
-                "--host", "${input:hostAddress}",
-                "--port", "${input:portNumber}"
-            ],
+            "program": "${workspaceFolder}/stream_parser.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {

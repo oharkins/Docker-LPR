@@ -177,22 +177,8 @@ class StreamParser:
         if hasattr(self, 'socket'):
             self.socket.close()
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description='Stream Parser')
-    parser.add_argument('--host', 
-                      type=str, 
-                      required=True, 
-                      help='Host address')
-    parser.add_argument('--port', 
-                      type=int,
-                      required=True, 
-                      
-                      help='Port number')
-    return parser.parse_args()
-
 def main():
-    args = parse_arguments()
-    parser = StreamParser(host=args.host, port=args.port)
+    parser = StreamParser(host=os.getenv('STREAM_HOST', 'localhost'), port=os.getenv('STREAM_PORT', '5000'))
     try:
         parser.connect()
     except KeyboardInterrupt:
